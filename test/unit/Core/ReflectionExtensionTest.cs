@@ -2,18 +2,15 @@
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using RapidCore.Reflection;
 using Skarp.HubSpotClient.Company;
 using Skarp.HubSpotClient.Contact.Dto;
-using Skarp.HubSpotClient.Core;
 using Xunit;
+using Skarp.HubSpotClient.Extensions;
 
 namespace Skarp.HubSpotClient.UnitTest.Core
 {
     public class ReflectionExtensionTest
     {
-
-
         [Fact]
         public void ReflectionExtension_resolves_prop_names_correctly()
         {

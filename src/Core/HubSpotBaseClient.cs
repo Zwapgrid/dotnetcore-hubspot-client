@@ -4,7 +4,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl;
 using Microsoft.Extensions.Logging;
-using RapidCore.Network;
 using Skarp.HubSpotClient.Core.Interfaces;
 using Skarp.HubSpotClient.Core.Requests;
 
@@ -12,14 +11,14 @@ namespace Skarp.HubSpotClient.Core
 {
     public abstract class HubSpotBaseClient
     {
-        protected readonly IRapidHttpClient HttpClient;
+        protected readonly IHttpClient HttpClient;
         protected readonly ILogger Logger;
         private readonly RequestSerializer _serializer;
         protected readonly string HubSpotBaseUrl;
         private readonly string _apiKey;
 
         protected HubSpotBaseClient(
-            IRapidHttpClient httpClient,
+            IHttpClient httpClient,
             ILogger logger,
             RequestSerializer serializer,
             string hubSpotBaseUrl,
@@ -43,7 +42,6 @@ namespace Skarp.HubSpotClient.Core
             where T : IHubSpotEntity, new()
         {
             Logger.LogDebug("Post async for uri path: '{0}' with type: '{1}'", absoluteUriPath, entity.GetType().Name);
-            var httpMethod = HttpMethod.Post;
 
             return await PutOrPost<T>(absoluteUriPath, entity, true);
         }
@@ -52,8 +50,6 @@ namespace Skarp.HubSpotClient.Core
             where T : IHubSpotEntity, new()
         {
             Logger.LogDebug("Post async for uri path: '{0}' with type: '{1}'", absoluteUriPath, entity.GetType().Name);
-            var json = _serializer.SerializeEntity(entity);
-            var httpMethod = HttpMethod.Post;
 
             return await PutOrPost<T>(absoluteUriPath, entity, false);
         }
@@ -71,7 +67,7 @@ namespace Skarp.HubSpotClient.Core
         {
             var json = _serializer.SerializeEntity(entity);
 
-            var data = await SendRequestAsync<T>(
+            var data = await SendRequestAsync(
                 absoluteUriPath,
                 usePost ? HttpMethod.Post : HttpMethod.Put,
                 json,
@@ -91,7 +87,7 @@ namespace Skarp.HubSpotClient.Core
             Logger.LogDebug("List async for uri path: '{0}'", absoluteUriPath);
             var httpMethod = HttpMethod.Get;
 
-            var data = await SendRequestAsync<T>(
+            var data = await SendRequestAsync(
                 absoluteUriPath,
                 httpMethod,
                 null,
@@ -105,6 +101,7 @@ namespace Skarp.HubSpotClient.Core
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="absoluteUriPath"></param>
+        /// <param name="entity"></param>
         /// <returns></returns>
         protected async Task<T> ListAsPostAsync<T>(string absoluteUriPath, object entity) where T : IHubSpotEntity, new()
         {
@@ -113,7 +110,7 @@ namespace Skarp.HubSpotClient.Core
 
             var httpMethod = HttpMethod.Post;
 
-            var data = await SendRequestAsync<T>(
+            var data = await SendRequestAsync(
                 absoluteUriPath,
                 httpMethod,
                 json,
@@ -133,7 +130,7 @@ namespace Skarp.HubSpotClient.Core
             Logger.LogDebug("Get async for uri path: '{0}'", absoluteUriPath);
             var httpMethod = HttpMethod.Get;
 
-            var data = await SendRequestAsync<T>(
+            var data = await SendRequestAsync(
                 absoluteUriPath,
                 httpMethod,
                 null,
@@ -148,7 +145,7 @@ namespace Skarp.HubSpotClient.Core
             Logger.LogDebug("Delete async for uri path: '{0}'", absoluteUriPath);
             var httpMethod = HttpMethod.Delete;
 
-            await SendRequestAsync<T>(
+            await SendRequestAsync(
                 absoluteUriPath,
                 httpMethod,
                 null,
@@ -167,8 +164,7 @@ namespace Skarp.HubSpotClient.Core
             Func<string, T> deserializeFunc)
             where T : IHubSpotEntity, new()
         {
-            var fullUrl = $"{HubSpotBaseUrl}{absoluteUriPath}"
-                .SetQueryParam("hapikey", _apiKey);
+            var fullUrl = $"{HubSpotBaseUrl}{absoluteUriPath}".SetQueryParam("hapikey", _apiKey);
             
             Logger.LogDebug("Full url: '{0}'", fullUrl);
 
@@ -177,6 +173,7 @@ namespace Skarp.HubSpotClient.Core
                 Method = httpMethod,
                 RequestUri = new Uri(fullUrl)
             };
+
             if (!string.IsNullOrWhiteSpace(json))
             {
                 request.Content = new JsonContent(json);

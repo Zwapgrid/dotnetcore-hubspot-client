@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using RapidCore.Network;
 using Skarp.HubSpotClient.Company.Dto;
 using Skarp.HubSpotClient.Company.Interfaces;
 using Skarp.HubSpotClient.Core;
@@ -22,7 +20,7 @@ namespace Skarp.HubSpotClient.Company
         /// <param name="hubSpotBaseUrl"></param>
         /// <param name="apiKey"></param>
         public HubSpotCompanyClient(
-            IRapidHttpClient httpClient,
+            IHttpClient httpClient,
             ILogger<HubSpotCompanyClient> logger,
             RequestSerializer serializer,
             string hubSpotBaseUrl,
@@ -39,14 +37,15 @@ namespace Skarp.HubSpotClient.Company
         /// via the network - if you wish to have support for functional tests and mocking use the "eager" constructor
         /// that takes in all underlying dependecies
         /// </remarks>
+        /// <param name="httpClient">Your implementation of IHttpClient</param>
         /// <param name="apiKey">Your API key</param>
-        public HubSpotCompanyClient(string apiKey)
+        public HubSpotCompanyClient(IHttpClient httpClient, string apiKey)
         : base(
-              new RealRapidHttpClient(new HttpClient()), 
-              NoopLoggerFactory.Get(), 
-              new RequestSerializer(new RequestDataConverter(NoopLoggerFactory.Get<RequestDataConverter>())),
-              "https://api.hubapi.com", 
-              apiKey)
+            httpClient, 
+            NoopLoggerFactory.Get(), 
+            new RequestSerializer(new RequestDataConverter(NoopLoggerFactory.Get<RequestDataConverter>())),
+            "https://api.hubapi.com", 
+            apiKey)
         { }
 
         /// <summary>
@@ -66,14 +65,14 @@ namespace Skarp.HubSpotClient.Company
         /// <summary>
         /// Return a single Company by id from hubspot
         /// </summary>
-        /// <param name="CompanyId"></param>
+        /// <param name="companyId"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public async Task<T> GetByIdAsync<T>(long CompanyId) where T : IHubSpotEntity, new()
+        public async Task<T> GetByIdAsync<T>(long companyId) where T : IHubSpotEntity, new()
         {
             Logger.LogDebug("Company Get by id ");
             var path = PathResolver(new CompanyHubSpotEntity(), HubSpotAction.Get)
-                .Replace(":companyId:", CompanyId.ToString());
+                .Replace(":companyId:", companyId.ToString());
             var data = await GetAsync<T>(path);
             return data;
         }
@@ -82,6 +81,7 @@ namespace Skarp.HubSpotClient.Company
         /// Get a Company by email address (only searches on domain)
         /// </summary>
         /// <param name="email"></param>
+        /// <param name="opts"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public async Task<T> GetByEmailAsync<T>(string email, CompanySearchByDomain opts = null) where T : IHubSpotEntity, new()
@@ -93,7 +93,7 @@ namespace Skarp.HubSpotClient.Company
             }
 
             var path = PathResolver(new CompanyHubSpotEntity(), HubSpotAction.GetByEmail)
-                .Replace(":domain:", email.Substring(email.IndexOf("@")+1));
+                .Replace(":domain:", email.Substring(email.IndexOf("@", StringComparison.Ordinal)+1));
             var data = await ListAsPostAsync<T>(path, opts);
             return data;
         }
@@ -113,12 +113,12 @@ namespace Skarp.HubSpotClient.Company
             return data;
         }
 
-        public async Task DeleteAsync(long CompanyId)
+        public async Task DeleteAsync(long companyId)
         {
-            Logger.LogDebug("Company delete w. id: {0}", CompanyId);
+            Logger.LogDebug("Company delete w. id: {0}", companyId);
 
             var path = PathResolver(new CompanyHubSpotEntity(), HubSpotAction.Delete)
-                .Replace(":companyId:", CompanyId.ToString());
+                .Replace(":companyId:", companyId.ToString());
 
             await DeleteAsync<CompanyHubSpotEntity>(path);
         }

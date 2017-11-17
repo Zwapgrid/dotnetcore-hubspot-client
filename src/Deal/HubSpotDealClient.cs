@@ -1,14 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
-using RapidCore.Network;
 using Skarp.HubSpotClient.Core;
 using Skarp.HubSpotClient.Core.Interfaces;
 using Skarp.HubSpotClient.Core.Requests;
 using Skarp.HubSpotClient.Deal.Dto;
 using Skarp.HubSpotClient.Deal.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Skarp.HubSpotClient.Deal
@@ -24,7 +21,7 @@ namespace Skarp.HubSpotClient.Deal
         /// <param name="hubSpotBaseUrl"></param>
         /// <param name="apiKey"></param>
         public HubSpotDealClient(
-            IRapidHttpClient httpClient,
+            IHttpClient httpClient,
             ILogger<HubSpotDealClient> logger,
             RequestSerializer serializer,
             string hubSpotBaseUrl,
@@ -41,14 +38,15 @@ namespace Skarp.HubSpotClient.Deal
         /// via the network - if you wish to have support for functional tests and mocking use the "eager" constructor
         /// that takes in all underlying dependecies
         /// </remarks>
+        /// <param name="httpClient">Your implementation of IHttpClient</param>
         /// <param name="apiKey">Your API key</param>
-        public HubSpotDealClient(string apiKey)
+        public HubSpotDealClient(IHttpClient httpClient, string apiKey)
         : base(
-              new RealRapidHttpClient(new HttpClient()),
-              NoopLoggerFactory.Get(),
-              new RequestSerializer(new RequestDataConverter(NoopLoggerFactory.Get<RequestDataConverter>())),
-              "https://api.hubapi.com",
-              apiKey)
+            httpClient,
+            NoopLoggerFactory.Get(),
+            new RequestSerializer(new RequestDataConverter(NoopLoggerFactory.Get<RequestDataConverter>())),
+            "https://api.hubapi.com",
+            apiKey)
         { }
 
         /// <summary>

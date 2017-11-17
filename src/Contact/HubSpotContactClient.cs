@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl;
 using Microsoft.Extensions.Logging;
-using RapidCore.Network;
 using Skarp.HubSpotClient.Contact.Dto;
 using Skarp.HubSpotClient.Contact.Interfaces;
 using Skarp.HubSpotClient.Core;
@@ -23,7 +21,7 @@ namespace Skarp.HubSpotClient.Contact
         /// <param name="hubSpotBaseUrl"></param>
         /// <param name="apiKey"></param>
         public HubSpotContactClient(
-            IRapidHttpClient httpClient,
+            IHttpClient httpClient,
             ILogger<HubSpotContactClient> logger,
             RequestSerializer serializer,
             string hubSpotBaseUrl,
@@ -40,14 +38,15 @@ namespace Skarp.HubSpotClient.Contact
         /// via the network - if you wish to have support for functional tests and mocking use the "eager" constructor
         /// that takes in all underlying dependecies
         /// </remarks>
+        /// <param name="httpClient">Your implementation of IHttpClient</param>
         /// <param name="apiKey">Your API key</param>
-        public HubSpotContactClient(string apiKey)
+        public HubSpotContactClient(IHttpClient httpClient, string apiKey)
         : base(
-              new RealRapidHttpClient(new HttpClient()), 
-              NoopLoggerFactory.Get(), 
-              new RequestSerializer(new RequestDataConverter(NoopLoggerFactory.Get<RequestDataConverter>())),
-              "https://api.hubapi.com", 
-              apiKey)
+            httpClient, 
+            NoopLoggerFactory.Get(), 
+            new RequestSerializer(new RequestDataConverter(NoopLoggerFactory.Get<RequestDataConverter>())),
+            "https://api.hubapi.com", 
+            apiKey)
         { }
 
         /// <summary>
@@ -109,6 +108,7 @@ namespace Skarp.HubSpotClient.Contact
             }
             var path = PathResolver(new ContactHubSpotEntity(), HubSpotAction.List)
                 .SetQueryParam("count", opts.NumberOfContactsToReturn);
+
             if (opts.ContactOffset.HasValue)
             {
                 path = path.SetQueryParam("vidOffset", opts.ContactOffset);

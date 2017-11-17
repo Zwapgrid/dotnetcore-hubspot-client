@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using RapidCore.Network;
+using NSubstitute;
+using Skarp.HubSpotClient.Core.Interfaces;
 using Skarp.HubSpotClient.Deal;
 using Skarp.HubSpotClient.Deal.Dto;
 using Skarp.HubSpotClient.Core.Requests;
@@ -17,15 +19,15 @@ namespace Skarp.HubSpotClient.FunctionalTests.Deal
         public HubSpotDealClientFunctionalTest(ITestOutputHelper output)
             : base(output)
         {
-            var mockHttpClient = new MockRapidHttpClient()
-                .AddTestCase(new CreateDealMockTestCase())
-                .AddTestCase(new GetDealMockTestCase())
-                .AddTestCase(new GetDealByIdNotFoundMockTestCase())
-                .AddTestCase(new UpdateDealMockTestCase())
-                .AddTestCase(new DeleteDealMockTestCase());
-
+            var httpClient = Substitute.For<IHttpClient>();
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => CreateDealMockTestCase.IsMatch(message))).Returns(ci => CreateDealMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => GetDealMockTestCase.IsMatch(message))).Returns(ci => GetDealMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => GetDealByIdNotFoundMockTestCase.IsMatch(message))).Returns(ci => GetDealByIdNotFoundMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => UpdateDealMockTestCase.IsMatch(message))).Returns(ci => UpdateDealMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => DeleteDealMockTestCase.IsMatch(message))).Returns(ci => DeleteDealMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            
             _client = new HubSpotDealClient(
-                mockHttpClient,
+                httpClient,
                 Logger,
                 new RequestSerializer(new RequestDataConverter(LoggerFactory.CreateLogger<RequestDataConverter>())),
                 "https://api.hubapi.com/",

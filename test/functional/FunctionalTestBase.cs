@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Logging;
-using RapidCore.Xunit.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace Skarp.HubSpotClient.FunctionalTests
@@ -17,7 +13,6 @@ namespace Skarp.HubSpotClient.FunctionalTests
         {
             Output = output;
             LoggerFactory = new LoggerFactory();
-            LoggerFactory.AddXunitOutput(output);
 
             Logger = LoggerFactory.CreateLogger<T>();
         }

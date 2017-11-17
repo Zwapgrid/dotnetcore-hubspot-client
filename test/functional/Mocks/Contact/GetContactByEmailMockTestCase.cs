@@ -1,19 +1,18 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using RapidCore.Network;
 using Skarp.HubSpotClient.Core;
 
 namespace Skarp.HubSpotClient.FunctionalTests.Mocks.Contact
 {
-    public class GetContactByEmailMockTestCase : IMockRapidHttpClientTestCase
+    public static class GetContactByEmailMockTestCase
     {
-        public bool IsMatch(HttpRequestMessage request)
+        public static bool IsMatch(HttpRequestMessage request)
         {
             return request.RequestUri.AbsolutePath.Contains("/contacts/v1/contact/email/testingapis@hubspot.com") && request.Method == HttpMethod.Get;
         }
 
-        public Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage request)
+        public static Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage request)
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
 

@@ -4,8 +4,8 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Skarp.HubSpotClient.Core.Interfaces;
+using Skarp.HubSpotClient.Extensions;
 
 namespace Skarp.HubSpotClient.Core.Requests
 {

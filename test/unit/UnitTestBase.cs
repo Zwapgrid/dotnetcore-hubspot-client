@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using RapidCore.Xunit.Logging;
 using Xunit.Abstractions;
 
 namespace Skarp.HubSpotClient.UnitTest
@@ -14,7 +13,6 @@ namespace Skarp.HubSpotClient.UnitTest
         {
             Output = output;
             LoggerFactory = new LoggerFactory();
-            LoggerFactory.AddXunitOutput(output);
 
             Logger = LoggerFactory.CreateLogger<T>();
         }

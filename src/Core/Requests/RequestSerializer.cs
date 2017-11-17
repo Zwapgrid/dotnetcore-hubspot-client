@@ -36,7 +36,7 @@ namespace Skarp.HubSpotClient.Core.Requests
         /// <summary>
         /// Serializes the entity to JSON.
         /// </summary>
-        /// <param name="entity">The entity.</param>
+        /// <param name="obj">The entity</param>
         /// <returns>The serialized entity</returns>
         public virtual string SerializeEntity(object obj)
         {

@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using RapidCore.Network;
+using NSubstitute;
 using Skarp.HubSpotClient.Company;
 using Skarp.HubSpotClient.Company.Dto;
+using Skarp.HubSpotClient.Core.Interfaces;
 using Skarp.HubSpotClient.Core.Requests;
 using Xunit;
 using Xunit.Abstractions;
@@ -17,16 +19,16 @@ namespace Skarp.HubSpotClient.FunctionalTests.Company
         public HubSpotCompanyClientFunctionalTest(ITestOutputHelper output)
             : base(output)
         {
-            var mockHttpClient = new MockRapidHttpClient()
-                .AddTestCase(new CreateCompanyMockTestCase())
-                .AddTestCase(new GetCompanyMockTestCase())
-                .AddTestCase(new GetCompanyByIdNotFoundMockTestCase())
-                .AddTestCase(new UpdateCompanyMockTestCase())
-                .AddTestCase(new DeleteCompanyMockTestCase())
-                .AddTestCase(new SearchByDomainMockTestCase());
-
+            var httpClient = Substitute.For<IHttpClient>();
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => CreateCompanyMockTestCase.IsMatch(message))).Returns(ci => CreateCompanyMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => GetCompanyMockTestCase.IsMatch(message))).Returns(ci => GetCompanyMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => GetCompanyByIdNotFoundMockTestCase.IsMatch(message))).Returns(ci => GetCompanyByIdNotFoundMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => UpdateCompanyMockTestCase.IsMatch(message))).Returns(ci => UpdateCompanyMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => DeleteCompanyMockTestCase.IsMatch(message))).Returns(ci => DeleteCompanyMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => SearchByDomainMockTestCase.IsMatch(message))).Returns(ci => SearchByDomainMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            
             _client = new HubSpotCompanyClient(
-                mockHttpClient,
+                httpClient,
                 Logger,
                 new RequestSerializer(new RequestDataConverter(LoggerFactory.CreateLogger<RequestDataConverter>())),
                 "https://api.hubapi.com/",

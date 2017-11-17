@@ -1,6 +1,4 @@
-﻿using System.Dynamic;
-
-namespace Skarp.HubSpotClient.Core.Interfaces
+﻿namespace Skarp.HubSpotClient.Core.Interfaces
 {
     public interface IHubSpotEntity
     {

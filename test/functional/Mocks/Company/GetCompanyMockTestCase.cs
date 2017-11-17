@@ -1,19 +1,18 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using RapidCore.Network;
 using Skarp.HubSpotClient.Core;
 
 namespace Skarp.HubSpotClient.FunctionalTests.Mocks.Company
 {
-    public class GetCompanyMockTestCase : IMockRapidHttpClientTestCase
+    public static class GetCompanyMockTestCase
     {
-        public bool IsMatch(HttpRequestMessage request)
+        public static bool IsMatch(HttpRequestMessage request)
         {
             return request.RequestUri.AbsolutePath.Contains("/companies/v2/companies/10444744") && request.Method == HttpMethod.Get;
         }
 
-        public Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage request)
+        public static Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage request)
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
 

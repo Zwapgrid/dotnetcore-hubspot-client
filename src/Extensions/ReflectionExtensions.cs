@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using RapidCore.Reflection;
 
-namespace Skarp.HubSpotClient.Core
+namespace Skarp.HubSpotClient.Extensions
 {
     internal static class ReflectionExtensions
     {
@@ -98,6 +99,32 @@ namespace Skarp.HubSpotClient.Core
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Get instances of the given instance
+        /// </summary>
+        /// <param name="member">The member</param>
+        /// <param name="attribute">The attribute to look for</param>
+        /// <returns>A list of attribute instances</returns>
+        public static List<Attribute> GetSpecificAttribute(this MemberInfo member, Type attribute)
+        {
+            return (
+                from a in member.GetCustomAttributes()
+                where a.GetType() == attribute
+                select a
+            ).ToList();
+        }
+
+        /// <summary>
+        /// Does the member have any instances of the given attribute?
+        /// </summary>
+        /// <param name="member">The member</param>
+        /// <param name="attribute">The attribute to check for</param>
+        /// <returns><c>True</c> if the member has the attribute, <c>false</c> otherwise</returns>
+        public static bool HasAttribute(this MemberInfo member, Type attribute)
+        {
+            return member.GetSpecificAttribute(attribute).Count > 0;
         }
     }
 }

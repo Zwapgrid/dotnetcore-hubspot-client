@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using RapidCore.Network;
+using NSubstitute;
 using Skarp.HubSpotClient.Contact;
 using Skarp.HubSpotClient.Contact.Dto;
+using Skarp.HubSpotClient.Core.Interfaces;
 using Skarp.HubSpotClient.Core.Requests;
-using Skarp.HubSpotClient.FunctionalTests.Mocks;
 using Xunit;
 using Xunit.Abstractions;
 using Skarp.HubSpotClient.FunctionalTests.Mocks.Contact;
@@ -21,17 +19,17 @@ namespace Skarp.HubSpotClient.FunctionalTests.Contact
         public HubSpotContactClientFunctionalTest(ITestOutputHelper output)
             : base(output)
         {
-            var mockHttpClient = new MockRapidHttpClient()
-                .AddTestCase(new CreateContactMockTestCase())
-                .AddTestCase(new ListContactMockTestCase())
-                .AddTestCase(new GetContactMockTestCase())
-                .AddTestCase(new GetContactByEmailMockTestCase())
-                .AddTestCase(new GetContactByEmailNotFoundMockTestCase())
-                .AddTestCase(new UpdateContactMockTestCase())
-                .AddTestCase(new DeleteContactMockTestCase());
+            var httpClient = Substitute.For<IHttpClient>();
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => CreateContactMockTestCase.IsMatch(message))).Returns(ci => CreateContactMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => ListContactMockTestCase.IsMatch(message))).Returns(ci => ListContactMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => GetContactMockTestCase.IsMatch(message))).Returns(ci => GetContactMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => GetContactByEmailMockTestCase.IsMatch(message))).Returns(ci => GetContactByEmailMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => GetContactByEmailNotFoundMockTestCase.IsMatch(message))).Returns(ci => GetContactByEmailNotFoundMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => UpdateContactMockTestCase.IsMatch(message))).Returns(ci => UpdateContactMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
+            httpClient.SendAsync(Arg.Is<HttpRequestMessage>(message => DeleteContactMockTestCase.IsMatch(message))).Returns(ci => DeleteContactMockTestCase.GetResponseAsync(ci.Arg<HttpRequestMessage>()));
 
             _client = new HubSpotContactClient(
-                mockHttpClient,
+                httpClient,
                 Logger,
                 new RequestSerializer(new RequestDataConverter(LoggerFactory.CreateLogger<RequestDataConverter>())),
                 "https://api.hubapi.com/",

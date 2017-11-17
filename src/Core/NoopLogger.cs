@@ -7,7 +7,6 @@ namespace Skarp.HubSpotClient.Core
     {
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            return;
         }
 
         public bool IsEnabled(LogLevel logLevel)

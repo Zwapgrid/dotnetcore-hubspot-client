@@ -1,22 +1,18 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using RapidCore.Network;
-using RapidCore.Threading;
 using Skarp.HubSpotClient.Core;
 
 namespace Skarp.HubSpotClient.FunctionalTests.Mocks.Company
 {
-    public class SearchByDomainMockTestCase : IMockRapidHttpClientTestCase
+    public static class SearchByDomainMockTestCase
     {
-        public bool IsMatch(HttpRequestMessage request)
+        public static bool IsMatch(HttpRequestMessage request)
         {
-            var requestData = request.Content.ReadAsStringAsync().AwaitSync();
             return request.RequestUri.AbsolutePath.EndsWith("/companies/v2/domains/miaki.io/companies");
         }
 
-        public Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage request)
+        public static Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage request)
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
 

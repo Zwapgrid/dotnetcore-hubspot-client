@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using RapidCore.Xunit.Logging;
 using Xunit.Abstractions;
 
 namespace integration
@@ -14,7 +13,6 @@ namespace integration
         {
             Output = output;
             LoggerFactory = new LoggerFactory();
-            LoggerFactory.AddXunitOutput(output);
 
             Logger = LoggerFactory.CreateLogger<T>();
         }

@@ -1,8 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using FakeItEasy;
-using RapidCore.Network;
+using NSubstitute;
 using Skarp.HubSpotClient.Core;
 using Skarp.HubSpotClient.Core.Interfaces;
 using Skarp.HubSpotClient.Core.Requests;
@@ -16,22 +15,18 @@ namespace Skarp.HubSpotClient.UnitTest.Company
     public class HubSpotCompanyClientTest : UnitTestBase<HubSpotCompanyClient>
     {
         private readonly HubSpotCompanyClient _client;
-        private IRapidHttpClient _mockHttpClient;
-        private RequestSerializer _mockSerializer;
+        private readonly IHttpClient _mockHttpClient;
+        private readonly RequestSerializer _mockSerializer;
 
         public HubSpotCompanyClientTest(ITestOutputHelper output) : base(output)
         {
-            _mockHttpClient = A.Fake<IRapidHttpClient>(opts => opts.Strict());
-
-            A.CallTo(() => _mockHttpClient.SendAsync(A<HttpRequestMessage>.Ignored))
+            _mockHttpClient = Substitute.For<IHttpClient>();
+            _mockHttpClient.SendAsync(Arg.Any<HttpRequestMessage>())
                 .Returns(Task.FromResult(CreateNewEmptyOkResponse()));
 
-            _mockSerializer = A.Fake<RequestSerializer>(opts => opts.Strict());
-            A.CallTo(() => _mockSerializer.SerializeEntity(A<CompanyHubSpotEntity>.Ignored))
-                .Returns("{}");
-
-            A.CallTo(() => _mockSerializer.DeserializeEntity<CompanyHubSpotEntity>(A<string>.Ignored))
-                .Returns(new CompanyHubSpotEntity());
+            _mockSerializer = Substitute.For<RequestSerializer>();
+            _mockSerializer.SerializeEntity(Arg.Any<CompanyHubSpotEntity>()).Returns("{}");
+            _mockSerializer.DeserializeEntity<CompanyHubSpotEntity>(Arg.Any<string>()).Returns(new CompanyHubSpotEntity());
 
             _client = new HubSpotCompanyClient(
                 _mockHttpClient,
@@ -71,9 +66,9 @@ namespace Skarp.HubSpotClient.UnitTest.Company
                 Description = "A new description"                
             });
 
-            A.CallTo(() => _mockHttpClient.SendAsync(A<HttpRequestMessage>.Ignored)).MustHaveHappened();
-            A.CallTo(() => _mockSerializer.SerializeEntity(A<IHubSpotEntity>.Ignored)).MustHaveHappened();
-            A.CallTo(() => _mockSerializer.DeserializeEntity<CompanyHubSpotEntity>("{}")).MustHaveHappened();
+            await _mockHttpClient.Received().SendAsync(Arg.Any<HttpRequestMessage>());
+            _mockSerializer.Received().SerializeEntity(Arg.Any<IHubSpotEntity>());
+            _mockSerializer.Received().DeserializeEntity<CompanyHubSpotEntity>("{}");
         }
 
     }

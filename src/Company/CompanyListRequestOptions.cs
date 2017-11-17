@@ -1,8 +1,5 @@
-﻿using Skarp.HubSpotClient.Core.Interfaces;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace Skarp.HubSpotClient.Company
 {
@@ -41,7 +38,6 @@ namespace Skarp.HubSpotClient.Company
         public bool IsPrimary { get; set; } = true;
 
         [DataMember(Name = "companyId")]
-        public long CompanyId { get; set; } = 0;
+        public long CompanyId { get; set; }
     }
-
 }

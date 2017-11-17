@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
-using RapidCore.Network;
 using Skarp.HubSpotClient.Contact;
 using Skarp.HubSpotClient.Contact.Dto;
 using Skarp.HubSpotClient.Core.Requests;
@@ -19,7 +16,7 @@ namespace integration.Contact
         public HubSpotContactClientIntegrationTest(ITestOutputHelper output) : base(output)
         {
             _client = new HubSpotContactClient(
-                new RealRapidHttpClient(new HttpClient()),
+                new RealHttpClient(),
                 base.Logger,
                 new RequestSerializer(new RequestDataConverter(LoggerFactory.CreateLogger<RequestDataConverter>())),
                 "https://api.hubapi.com",

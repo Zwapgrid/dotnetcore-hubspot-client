@@ -1,37 +1,33 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using FakeItEasy;
-using RapidCore.Network;
+using NSubstitute;
 using Skarp.HubSpotClient.Core;
 using Skarp.HubSpotClient.Core.Interfaces;
 using Skarp.HubSpotClient.Core.Requests;
-using Xunit;
-using Xunit.Abstractions;
 using Skarp.HubSpotClient.Deal;
 using Skarp.HubSpotClient.Deal.Dto;
+using Xunit;
+using Xunit.Abstractions;
 
-namespace Skarp.HubSpotClient.UnitTest.Contact
+namespace Skarp.HubSpotClient.UnitTest.Deal
 {
     public class HubSpotDealClientTest : UnitTestBase<HubSpotDealClient>
     {
         private readonly HubSpotDealClient _client;
-        private IRapidHttpClient _mockHttpClient;
-        private RequestSerializer _mockSerializer;
+        private readonly IHttpClient _mockHttpClient;
+        private readonly RequestSerializer _mockSerializer;
 
         public HubSpotDealClientTest(ITestOutputHelper output) : base(output)
         {
-            _mockHttpClient = A.Fake<IRapidHttpClient>(opts => opts.Strict());
+            _mockHttpClient = Substitute.For<IHttpClient>();
 
-            A.CallTo(() => _mockHttpClient.SendAsync(A<HttpRequestMessage>.Ignored))
+            _mockHttpClient.SendAsync(Arg.Any<HttpRequestMessage>())
                 .Returns(Task.FromResult(CreateNewEmptyOkResponse()));
 
-            _mockSerializer = A.Fake<RequestSerializer>(opts => opts.Strict());
-            A.CallTo(() => _mockSerializer.SerializeEntity(A<DealHubSpotEntity>.Ignored))
-                .Returns("{}");
-
-            A.CallTo(() => _mockSerializer.DeserializeEntity<DealHubSpotEntity>(A<string>.Ignored))
-                .Returns(new DealHubSpotEntity());
+            _mockSerializer = Substitute.For<RequestSerializer>();
+            _mockSerializer.SerializeEntity(Arg.Any<DealHubSpotEntity>()).Returns("{}");
+            _mockSerializer.DeserializeEntity<DealHubSpotEntity>(Arg.Any<string>()).Returns(new DealHubSpotEntity());
 
             _client = new HubSpotDealClient(
                 _mockHttpClient,
@@ -73,9 +69,9 @@ namespace Skarp.HubSpotClient.UnitTest.Contact
                 DealType = "newbusiness"
             });
 
-            A.CallTo(() => _mockHttpClient.SendAsync(A<HttpRequestMessage>.Ignored)).MustHaveHappened();
-            A.CallTo(() => _mockSerializer.SerializeEntity(A<IHubSpotEntity>.Ignored)).MustHaveHappened();
-            A.CallTo(() => _mockSerializer.DeserializeEntity<DealHubSpotEntity>("{}")).MustHaveHappened();
+            await _mockHttpClient.Received().SendAsync(Arg.Any<HttpRequestMessage>());
+            _mockSerializer.Received().SerializeEntity(Arg.Any<IHubSpotEntity>());
+            _mockSerializer.Received().DeserializeEntity<DealHubSpotEntity>("{}");
         }
 
     }
